@@ -1,5 +1,5 @@
 # Watches directory for a trigger file, then mounts a veracrypt hidden volume
-
+import os
 import sys
 import time
 from watchdog.observers import Observer
@@ -10,7 +10,7 @@ class Handler(FileSystemEventHandler):
         if not event.is_directory:
             print("File Detected:", event.src_path) 
 
-path = sys.argv[1]
+path = os.path.dirname(os.path.abspath(__file__))
 
 observer = Observer()
 observer.schedule(Handler(), path)
