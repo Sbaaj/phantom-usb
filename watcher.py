@@ -7,6 +7,13 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+if len(sys.argv) < 3: 
+    print("Usage: sudo python watcher.py <watch_path> <container_path>")
+    sys.exit(1)
+
+watch_path = sys.argv[1]
+container_path = sys.argv[2]
+
 class Handler(FileSystemEventHandler):
     def on_created(self, event):
         if not event.is_directory:
@@ -15,7 +22,7 @@ class Handler(FileSystemEventHandler):
 
                 try:
                     with open(event.src_path, 'r') as file:
-                        password = file.read().strip()
+                        password = file.read().rstrip('\n')
 
                         if not password:
                             return
@@ -26,7 +33,7 @@ class Handler(FileSystemEventHandler):
                 
                     subprocess.run([
                         "sudo", "veracrypt", "--text", "--mount",
-                        "/run/media/user/7549-7DD9/data.vc",
+                        container_path,
                         "/mnt",
                         f"--password={password}",
                         "--non-interactive"
@@ -37,10 +44,8 @@ class Handler(FileSystemEventHandler):
                 except Exception as e:
                     print("Couldn't read file:", e) 
 
-path = os.path.dirname(os.path.abspath(__file__))
-
 observer = Observer()
-observer.schedule(Handler(), path)
+observer.schedule(Handler(), watch_path)
 
 observer.start()
 
