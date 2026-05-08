@@ -1,5 +1,6 @@
 # Watches directory for a trigger file, then mounts a veracrypt hidden volume
 
+import subprocess
 import os
 import sys
 import time
@@ -18,12 +19,21 @@ class Handler(FileSystemEventHandler):
 
                         if not password:
                             return
-                
-                        print("Password found:", password)
 
                         time.sleep(0.1)
                         os.remove(event.src_path)
+                        print("Trigger file destroyed. mounting...")
                 
+                    subprocess.run([
+                        "sudo", "veracrypt", "--text", "--mount",
+                        "/run/media/user/7549-7DD9/data.vc",
+                        "/mnt",
+                        f"--password={password}",
+                        "--non-interactive"
+                    ])
+                    print("Volume mounted at /mnt")
+
+
                 except Exception as e:
                     print("Couldn't read file:", e) 
 
